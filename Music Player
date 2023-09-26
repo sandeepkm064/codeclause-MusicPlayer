@@ -1,0 +1,94 @@
+# Import necessary modules
+from tkinter import *
+from tkinter import filedialog
+import pygame.mixer as mixer
+import os
+# Function to play the selected song from the playlist
+def play_song():
+    selected_song = playlist.curselection()
+    if selected_song:
+        song_index = selected_song[0]
+        song_name = playlist.get(song_index)
+
+        mixer.music.load(song_name)  # Load the selected song using pygame
+        mixer.music.play()  # Play the loaded song
+        status.set("Now playing: " + os.path.basename(song_name))  # Update the status label
+
+# Function to stop the currently playing song
+def stop_song():
+    mixer.music.stop()  # Stop the music playback
+    status.set("Song stopped")  # Update the status label
+
+# Function to load music files from a selected directory into the playlist
+def load():
+    directory = filedialog.askdirectory(title='Open a songs directory')
+    if directory:
+        os.chdir(directory)
+
+        tracks = os.listdir()
+        playlist.delete(0, END)  # Clear the current playlist
+        for track in tracks:
+            if track.lower().endswith(('.mp3', '.wav', '.ogg', '.flac')):
+                playlist.insert(END, track)  # Insert compatible music files into the playlist
+
+# Function to pause the currently playing song
+def pause_song():
+    mixer.music.pause()  # Pause the music playback
+    status.set("Song paused")  # Update the status label
+
+# Function to resume a paused song
+def resume_song():
+    mixer.music.unpause()  # Resume the paused music playback
+    status.set("Song resumed")  # Update the status label
+# Initializing the mixer (Pygame)
+mixer.init()
+
+# Creating the main GUI window for the music player
+root = Tk()
+root.geometry('800x280')  # Set window size to 800x280
+root.title('PythonGeeks Music Player')
+root.resizable(0, 0)
+''
+# Frames for different sections of the GUI
+song_frame = LabelFrame(root, text='Current Song', bg='Lightblue', width=500, height=80)
+song_frame.place(x=10, y=10)
+
+button_frame = LabelFrame(root, text='Control Buttons',fg='white', bg='Darkblue', width=500, height=120)
+button_frame.place(y=100)
+
+listbox_frame = LabelFrame(root, text='Playlist',fg='white', bg='darkblue', width=280, height=200)
+listbox_frame.place(x=520, y=10)
+# Playlist ListBox to display loaded songs
+playlist = Listbox(listbox_frame, font=('Arial', 12), selectbackground='Yellow', selectmode=SINGLE)
+playlist.pack(fill=BOTH, expand=True, padx=5, pady=5)
+
+scroll_bar = Scrollbar(listbox_frame, orient=VERTICAL, command=playlist.yview)
+scroll_bar.pack(side=RIGHT, fill=Y)
+
+playlist.config(yscrollcommand=scroll_bar.set)
+# Label to display the currently playing song
+Label(song_frame, text='CURRENTLY PLAYING:', bg='lightblue', font=('Times', 14, 'bold')).place(x=5, y=5)
+current_song = StringVar(value='<Not selected>')
+song_lbl = Label(song_frame, textvariable=current_song, bg='grey', font=("Arial", 16), width=20)
+song_lbl.place(x=300, y=20)
+# Buttons in the main screen
+play_btn = Button(button_frame, text='Play', bg='PaleTurquoise', font=("Helvetica", 14), width=8, command=play_song)
+play_btn.grid(row=0, column=0, padx=15, pady=10)
+
+pause_btn = Button(button_frame, text='Pause', bg='PaleTurquoise', font=("Helvetica", 14), width=8, command=pause_song)
+pause_btn.grid(row=0, column=1, padx=15, pady=10)
+
+resume_btn = Button(button_frame, text='Resume', bg='PaleTurquoise', font=("Helvetica", 14), width=8, command=resume_song)
+resume_btn.grid(row=0, column=2, padx=15, pady=10)
+
+stop_btn = Button(button_frame, text='Stop', bg='PaleTurquoise', font=("Helvetica", 14), width=8, command=stop_song)
+stop_btn.grid(row=0, column=3, padx=15, pady=10)
+
+load_btn = Button(button_frame, text='Load Directory', bg='PaleTurquoise', font=("Helvetica", 14), width=20, command=load)
+load_btn.grid(row=1, column=0, columnspan=4, pady=10)
+# Label at the bottom to display the playback status
+status = StringVar(value='<Not Available>')
+Label(root, textvariable=status, bg='LightBlue', font=('Arial', 12), justify=LEFT).pack(side=BOTTOM, fill=X)
+
+# Finalizing the GUI and running the main event loop
+root.mainloop()
